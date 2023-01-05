@@ -25,6 +25,8 @@ class ListItemsRV : AppCompatActivity() {
     var temp = 0
 
     var isFirstTime: Boolean = false
+    var indexLastLog = true
+
 
     var data = ArrayList<ItemsViewModel>()
 
@@ -86,11 +88,16 @@ class ListItemsRV : AppCompatActivity() {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+
                 val visibleItemCount: Int = linearLayoutManager.childCount /*- 1*/
                 val totalItemCount: Int = linearLayoutManager.itemCount
                 val firstVisibleItemPosition: Int =
                     linearLayoutManager.findFirstVisibleItemPosition()
                 val lastItem = firstVisibleItemPosition + visibleItemCount - 2
+                val lastIndexItem = firstVisibleItemPosition + visibleItemCount - 1
+
+
+                Log.d("lastIndexItem", "Last Index::: ${lastIndexItem}" )
 
 
                 Log.d(
@@ -112,7 +119,6 @@ class ListItemsRV : AppCompatActivity() {
                             var bundle = Bundle().apply {
                                 putString(FirebaseAnalytics.Param.ITEM_ID, data[i].text)
                                 putString(FirebaseAnalytics.Param.ITEM_NAME, data[i].text)
-
                             }
 
                             arrayBundle.add(i,bundle)
@@ -170,6 +176,30 @@ class ListItemsRV : AppCompatActivity() {
 
                     //flag updated here
                     flag = lastItem
+                } else if(data.lastIndex == lastIndexItem) {
+
+                    if (indexLastLog == true) {
+
+                        indexLastLog = false
+                        arrayBundle.clear()
+
+                        var bundle = Bundle().apply {
+                            putString(FirebaseAnalytics.Param.ITEM_ID, data[data.lastIndex].text)
+                            putString(FirebaseAnalytics.Param.ITEM_NAME, data[data.lastIndex].text)
+                        }
+                        arrayBundle.add(bundle)
+
+                        var viewItemListBundle = Bundle().apply {
+                            putString(FirebaseAnalytics.Param.ITEM_LIST_ID, "last_index")
+                            putString(FirebaseAnalytics.Param.ITEM_LIST_NAME, "SecondScrollItem")
+                            putParcelableArrayList(FirebaseAnalytics.Param.ITEMS, arrayBundle)
+                        }
+
+                        firebaseAnalytics.logEvent(
+                            FirebaseAnalytics.Event.VIEW_ITEM_LIST,
+                            viewItemListBundle
+                        )
+                    }
                 }
             }
         }
